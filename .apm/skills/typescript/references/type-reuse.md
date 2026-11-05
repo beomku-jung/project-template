@@ -95,10 +95,9 @@ export function getProperty<T, K extends keyof T>(value: T, key: K): T[K] {
 
 ## 타입 오류 검증
 
-[제네릭 예제](#제네릭)의 `get-property.ts`와 아래 파일을 `typecheck`에 포함합니다. 실행 없이 허용·거부할 호출을 검사합니다.
+[제네릭 예제](#제네릭)의 `get-property.ts`와 아래 코드를 타입 검사기의 입력 범위에 포함합니다. 실행 없이 허용·거부할 호출을 검사합니다.
 
 ```ts
-// get-property.typecheck.ts
 import { getProperty } from "./get-property.ts";
 
 const product = { name: "머그컵", price: 1_200 };

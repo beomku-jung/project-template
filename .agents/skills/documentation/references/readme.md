@@ -32,7 +32,7 @@ pnpm check
 `libs/example/README.md`에 적용하는 예제입니다.
 
 - API: 초기값을 받는 `createStore`와 현재 값을 읽는 `store.value`
-- 검사: `typecheck` 스크립트, 패키지 이름과 같은 Vitest 프로젝트
+- 검사: 루트 `check` 스크립트로 전체 검사, 패키지 이름과 같은 Vitest 프로젝트로 런타임 테스트
 
 ````markdown
 # @project-template/example
@@ -63,17 +63,21 @@ console.log(store.value); // "ready"
 
 ## 개발
 
-저장소 루트에서 실행합니다.
+전체 검사는 저장소 루트에서 실행합니다.
 
 ```sh
-pnpm --filter @project-template/example run typecheck
+pnpm check
+```
+
+해당 패키지의 런타임 테스트만 실행하려면 저장소 루트에서 다음 명령을 사용합니다.
+
+```sh
 pnpm test --project @project-template/example
 ```
 ````
 
 ### 참고
 
-- [pnpm 필터](https://pnpm.io/filtering)
 - [Vitest 프로젝트 선택](https://vitest.dev/guide/projects.html#running-tests)
 
 ### 패키지 유형에 맞추기

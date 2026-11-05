@@ -13,7 +13,7 @@ mise run setup
 pnpm check
 ```
 
-현재는 패키지가 없어 `pnpm check`의 테스트 단계가 `No projects were found`로 실패합니다. [Vitest 설정](vitest.config.ts)의 `passWithNoTests`는 테스트 파일이 없는 경우만 허용합니다.
+현재 테스트 파일은 없습니다. [Vitest 설정](vitest.config.ts)의 `projects` 패턴에 맞는 디렉터리가 있으면 `passWithNoTests`가 테스트 0개를 허용하지만, 일치하는 프로젝트 디렉터리 자체가 없으면 `No projects were found`로 실패합니다.
 
 ## 안내
 
