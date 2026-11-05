@@ -2,9 +2,9 @@
 
 ## HTTP 응답
 
-- 선행 파일: [외부 입력 예제](type-patterns.md#외부-입력)의 `parse-user.ts`를 같은 디렉터리에 배치
-- 실행: 독립된 Node.js 프로세스; `fetch` 고정 응답으로 외부 요청 없이 확인
-- 적용: `api.example.com`을 실제 API 주소로 교체
+- 선행 파일: [외부 입력 예제](type-patterns.md#외부-입력)의 `parse-user.ts`를 같은 디렉터리에 배치합니다.
+- 실행 환경: 독립된 Node.js 프로세스에서 실행합니다. 예제는 `fetch`를 고정 응답으로 대체해 외부 요청 없이 응답 처리를 검증합니다.
+- 실제 API 적용: `api.example.com`을 실제 API 주소로 바꿉니다.
 
 ````ts
 // load-user.ts
@@ -62,8 +62,8 @@ export async function loadUser(id: string): Promise<User> {
 
 ## 파일 I/O
 
-- 실행: `mkdtempDisposable`·`await using` 지원 Node.js
-- 정리: 사용 예제의 스코프 종료 시 임시 디렉터리 삭제
+- 실행 환경: `mkdtempDisposable`·`await using`을 지원하는 Node.js가 필요합니다.
+- 자원 정리: 사용 예제의 스코프가 끝나면 임시 디렉터리를 삭제합니다.
 - 참고: [Node.js 임시 디렉터리 정리](https://nodejs.org/api/fs.html#fspromisesmkdtempdisposableprefix-options)
 
 ````ts

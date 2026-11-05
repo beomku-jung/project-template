@@ -211,4 +211,4 @@ export const ACCESS_LABELS = {
 } as const satisfies Record<AccessLevel, string>;
 ```
 
-`as const`는 리터럴 유지, [`satisfies`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)는 구조 검사입니다. 런타임 입력은 별도로 검증합니다.
+`as const`는 리터럴 타입을 유지하고, [`satisfies`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)는 구조를 검사합니다. 런타임 입력은 별도로 검증합니다.

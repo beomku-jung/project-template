@@ -11,7 +11,7 @@ Node.js의 내장 타입 제거는 `node_modules` 아래의 TypeScript 파일에
 
 ## 단일 배럴
 
-공유 패키지 `@example/library`의 API를 `src/index.ts` 하나에서 소유 파일로 직접 연결합니다.
+공유 패키지 `@example/library`의 API를 선언한 파일들을 `src/index.ts` 하나에서 직접 재수출합니다.
 [사용자 검증](type-patterns.md#외부-입력)과 [상태별 문구](type-patterns.md#상태별-데이터)를 배치하는 예제입니다.
 
 ```text
@@ -92,7 +92,7 @@ export * from "./files/combine-files.ts";
 | 패키지 내부 의존성의 환경별 구현 | `imports`의 `#` 이름과 조건 |
 
 조건은 객체의 키 순서대로 선택되므로 구체적인 조건을 먼저, 범용 대체 구현인 `default`를 마지막에 둡니다.
-사용자 조건의 지원·활성화 여부를 런타임·번들러·타입 검사기에서 확인합니다.
+사용자 조건의 지원·활성화 여부를 실행 환경·번들러·타입 검사기에서 확인합니다.
 소비 환경별로 선택된 구현과 공개 API·초기화 동작을 검증합니다.
 
 ### 참고

@@ -52,7 +52,7 @@ export function toProductSummary(product: Product): ProductSummary {
 | 함수 인자     | `Parameters<typeof toProductSummary>` |
 | 함수 결과     | `ReturnType<typeof toProductSummary>` |
 
-- 실제 반환 필드도 제한하려면 예제처럼 새 객체를 만듭니다.
+- 반환 객체의 필드도 제한하려면 예제처럼 새 객체를 만듭니다.
 - 내장 유틸리티를 우선하고, 반복되거나 의미 있는 조합에 타입 이름을 붙입니다.
 
 참고: [유틸리티 타입](https://www.typescriptlang.org/docs/handbook/utility-types.html)
@@ -95,7 +95,7 @@ export function getProperty<T, K extends keyof T>(value: T, key: K): T[K] {
 
 ## 타입 오류 검증
 
-[제네릭 예제](#제네릭)의 `get-property.ts`와 아래 코드를 타입 검사기의 입력 범위에 포함합니다. 실행 없이 허용·거부할 호출을 검사합니다.
+[제네릭 예제](#제네릭)의 `get-property.ts`와 아래 코드를 타입 검사기의 입력 범위에 포함합니다. 코드를 실행하지 않고 허용할 호출과 거부할 호출을 타입 검사합니다.
 
 ```ts
 import { getProperty } from "./get-property.ts";

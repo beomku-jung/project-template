@@ -1,6 +1,7 @@
 # project-template
 
-pnpm·TypeScript 모노레포 템플릿입니다. 공통 개발 도구와 검사 환경을 제공하며, 실행 환경과 빌드는 패키지별로 구성합니다. 루트 [package.json](package.json)은 개발 도구 관리용 비공개 ESM 패키지입니다.
+pnpm·TypeScript 모노레포 템플릿입니다. 공통 개발 도구와 검사 환경을 제공하며, 실행 환경과 빌드는 패키지별로 구성합니다.
+루트 [package.json](package.json)은 개발 도구를 관리하는 비공개 ESM 패키지입니다.
 
 ## 시작
 
@@ -13,7 +14,8 @@ mise run setup
 pnpm check
 ```
 
-현재 테스트 파일은 없습니다. [Vitest 설정](vitest.config.ts)의 `projects` 패턴에 맞는 디렉터리가 있으면 `passWithNoTests`가 테스트 0개를 허용하지만, 일치하는 프로젝트 디렉터리 자체가 없으면 `No projects were found`로 실패합니다.
+현재 테스트 파일은 없습니다. [Vitest 설정](vitest.config.ts)의 `projects` 패턴에 맞는 디렉터리가 있으면 `passWithNoTests`가 테스트 0개를 허용합니다.
+새로 복제한 저장소처럼 일치하는 프로젝트 디렉터리 자체가 없으면 `No projects were found`로 실패합니다.
 
 ## 안내
 
