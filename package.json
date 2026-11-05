@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "oxfmt --check && oxlint && cspell --no-progress . && pnpm run knip && pnpm run typecheck && pnpm test",
+    "check": "oxfmt --check && oxlint --type-check && cspell --no-progress . && pnpm run knip && pnpm test",
     "fix": "oxlint --fix && oxfmt",
     "knip": "knip",
     "prepare": "husky",
@@ -15,15 +15,15 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@commitlint/types": "^21.2.3",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "cspell": "^10.4.0",
     "husky": "^9.1.7",
-    "knip": "^6.43.0",
+    "knip": "^6.44.1",
     "lint-staged": "^17.6.0",
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
+    "oxfmt": "^0.76.0",
+    "oxlint": "^1.91.0",
     "oxlint-tsgolint": "^7.0.2005",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }

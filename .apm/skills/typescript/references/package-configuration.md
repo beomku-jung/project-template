@@ -24,10 +24,7 @@ packages/example/
   "name": "@example/sample",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "scripts": {
-    "typecheck": "tsc"
-  }
+  "type": "module"
 }
 ```
 
@@ -75,12 +72,36 @@ export default defineProject({ test: {} });
 | `include`·`exclude` | 기본 탐색으로 부족할 때 지정; 제외한 파일도 import되면 검사에 포함          |
 | `paths`             | 런타임 경로는 그대로이므로 생성 도구·테스트·번들러도 별칭을 해석하는지 확인 |
 
-변경 전후 `tsc --showConfig`의 시작 파일과 `tsc --listFilesOnly`의 전이 참조를 대조합니다.
-분리한 설정을 검사 명령에 모두 연결하고 실제 실행·빌드도 검증합니다.
+앞의 `packages/example/tsconfig.json` 예제는 저장소 루트에서 다음 명령으로 범위를 진단합니다.
+
+```sh
+pnpm exec tsc --project packages/example/tsconfig.json --showConfig
+pnpm exec tsc --project packages/example/tsconfig.json --listFilesOnly
+```
+
+- `--showConfig`: 상속을 반영한 최종 설정과 시작 파일 목록(`files`)을 확인합니다.
+- `--listFilesOnly`: import로 포함된 파일·타입 선언까지 포함하는 TypeScript 프로그램의 파일 목록에서 의도한 소스·테스트 경로를 확인합니다.
+
+설정을 나눴다면 각 실제 설정 경로로 `--project` 값을 바꿔 반복합니다.
+두 명령은 설정·파일 목록을 출력할 뿐 타입 검사나 빌드를 실행하지 않습니다.
+
+분리한 각 설정은 기존 타입 검사 단계에서 실제로 검사해야 합니다.
+`tsc`를 사용하는 프로젝트라면 해당 단계에서 `pnpm exec tsc --project packages/example/tsconfig.json --noEmit`의 경로를 각 실제 설정으로 바꿔 실행합니다.
+
+Oxlint를 사용한다면 저장소 루트에서 린트가 선택하는 진입 파일도 별도로 확인합니다.
+
+```sh
+pnpm exec oxlint --debug files
+```
+
+이 명령은 린트 대상 파일을 출력하고 종료하며 실제 검증을 실행하지 않습니다.
+전체 TypeScript 프로그램 목록은 아니며, 앞의 `tsc` 목록도 Oxlint의 검사 범위를 증명하지 않습니다.
 
 ### 참고
 
 - [실행 환경과 모듈 옵션](https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html)
+- [TypeScript CLI의 설정·파일 목록 옵션](https://www.typescriptlang.org/docs/handbook/compiler-options.html#cli-commands)
+- [Oxlint CLI의 파일 탐색 진단](https://oxc.rs/docs/guide/usage/linter/cli.md)
 - [전역 타입](https://www.typescriptlang.org/tsconfig/types.html)
 - [파일 제외](https://www.typescriptlang.org/tsconfig/#exclude)
 - [경로 별칭](https://www.typescriptlang.org/tsconfig/#paths)

@@ -11,19 +11,22 @@
 
 ## 명령
 
-| 명령                             | 용도                                             |
-| -------------------------------- | ------------------------------------------------ |
-| `mise run setup`                 | 의존성·스킬 설치                                 |
-| `mise run update`                | 개발 도구·의존성·외부 스킬 갱신                  |
-| `pnpm fix`                       | 린트 자동 수정·포맷                              |
-| `pnpm check`                     | 포맷·린트·철자·미사용 항목·타입·테스트 순차 검사 |
-| `pnpm knip`                      | 미사용 파일·의존성·내보내기 검사                 |
-| `pnpm typecheck`                 | 루트와 패키지의 타입 검사                        |
-| `pnpm test`                      | 전체 Vitest 테스트                               |
-| `pnpm test --project <패키지명>` | 패키지별 테스트                                  |
-| `pnpm exec vitest`               | 테스트 감시 모드                                 |
+| 명령                             | 용도                             |
+| -------------------------------- | -------------------------------- |
+| `mise run setup`                 | 의존성·스킬 설치                 |
+| `mise run update`                | 개발 도구·의존성·외부 스킬 갱신  |
+| `pnpm fix`                       | 린트 자동 수정·포맷              |
+| `pnpm check`                     | 전체 검사                        |
+| `pnpm knip`                      | 미사용 파일·의존성·내보내기 검사 |
+| `pnpm test`                      | 전체 Vitest 테스트               |
+| `pnpm test --project <패키지명>` | 패키지별 테스트                  |
+| `pnpm exec vitest`               | 테스트 감시 모드                 |
 
 명령 정의는 [package.json](package.json)과 [mise.toml](mise.toml), CI 실행 조건은 [CI 설정](.github/workflows/ci.yml)에서 확인합니다.
+
+`pnpm check`는 포맷 → Oxlint의 린트·컴파일러 진단(실험적인 `--type-check`) → 철자 → 미사용 항목 → 런타임 테스트 순서로 실행합니다.
+
+tsconfig의 `include`·`exclude`만으로 Oxlint의 파일 탐색 범위가 제한되지는 않습니다.
 
 ## 저장소 구조
 
@@ -111,13 +114,13 @@ pnpm install
 | [pre-commit](.husky/pre-commit) | 스테이징된 파일의 린트 자동 수정·포맷·철자 검사 | [lint-staged.config.ts](lint-staged.config.ts) |
 | [commit-msg](.husky/commit-msg) | 커밋 메시지 형식 검사                           | [commitlint.config.ts](commitlint.config.ts)   |
 
-lint-staged의 수정 결과는 스테이징에 반영하며 부분 스테이징을 보존합니다. 타입·테스트를 포함한 전체 검사는 `pnpm check`로 실행합니다.
+lint-staged의 수정 결과는 스테이징에 반영하며 부분 스테이징을 보존합니다. pre-commit은 `pnpm check`를 대체하지 않습니다.
 
 ### 테스트
 
 루트 [vitest.config.ts](vitest.config.ts)가 패키지별 테스트를 모아 실행합니다.
 
-초기 테스트 제한은 [README.md](README.md#시작)를 참고합니다. 테스트를 추가하면 루트의 `passWithNoTests`를 제거합니다.
+초기 테스트 동작과 허용 범위는 [README.md](README.md#시작)를 참고합니다. 테스트를 추가하면 루트의 `passWithNoTests`를 제거합니다.
 
 ## 완료 조건
 
