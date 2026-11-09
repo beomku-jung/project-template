@@ -2,7 +2,7 @@
 
 ## 외부 입력
 
-기존 스키마 검증기가 있으면 재사용합니다.
+외부 입력은 `unknown`으로 받고, 속성의 존재·타입·값의 제약을 검사한 뒤 공개 타입을 반환합니다. 기존 스키마 검증기가 같은 제약·정규화·추가 필드 처리 계약을 제공하면 재사용합니다.
 
 ````ts
 // parse-user.ts
@@ -57,16 +57,16 @@ export function parseUser(value: unknown): User {
 }
 ````
 
-| 입력 경계                        | 처리                         |
-| -------------------------------- | ---------------------------- |
-| `JSON.parse()`·`response.json()` | `unknown`에 받은 뒤 검증     |
-| `as User`·`!`·`any`              | 런타임 검증을 대신할 수 없음 |
+| 입력 경계                        | 처리                                                             |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `JSON.parse()`·`response.json()` | 반환값을 `unknown`에 받은 뒤 사용 전에 검증                      |
+| `as User`·`!`·`any`              | 컴파일러가 다루는 타입만 바꾸므로 런타임 검증 대신 사용하지 않음 |
 
 참고: [타입 좁히기](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
 
 ## 상태별 데이터
 
-상태마다 필요한 값이 다를 때 사용합니다. [외부 입력 예제](#외부-입력)의 `parse-user.ts`를 함께 사용합니다.
+상태마다 사용할 수 있는 값이 다르면 판별 유니온으로 표현하고, 판별자를 좁힌 뒤 해당 값을 읽습니다. 아래 예제는 [외부 입력 예제](#외부-입력)의 `parse-user.ts`를 함께 사용합니다.
 
 ````ts
 // get-user-label.ts
@@ -112,9 +112,11 @@ export function getUserLabel(state: UserState): string {
 }
 ````
 
-`never`는 새 상태의 분기 누락을 검사합니다.
+`never` 대입은 새 상태를 추가했을 때 빠진 분기를 컴파일러 진단으로 드러냅니다. 외부 입력을 이 타입으로 단언했다고 런타임의 잘못된 판별자를 거부하는 것은 아니므로, 입력 경계의 검증은 별도로 둡니다.
 
 ## 읽기 전용 입력
+
+함수가 원본 배열을 바꾸지 않으면 매개변수에 `readonly`를 사용합니다. 정렬 결과도 필요하면 원본을 수정하는 `sort()` 대신 대상 런타임이 지원하는 `toSorted()`를 사용합니다. 지원하지 않는 런타임에서는 복사 후 정렬하거나 해당 API를 제공하는 폴리필을 사용합니다.
 
 ````ts
 // get-sorted-prices.ts
@@ -143,16 +145,16 @@ export function getSortedPrices(prices: readonly number[]): number[] {
 }
 ````
 
-| 구분                     | 보장 범위                                              |
-| ------------------------ | ------------------------------------------------------ |
-| `readonly`·`Readonly<T>` | 해당 참조의 타입 검사; 런타임 동결·깊은 불변성은 제외  |
-| `toSorted()`             | 새 배열 반환; 객체 원소는 공유하므로 변경 시 별도 복사 |
+| 구분                     | 보장 범위                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `readonly`·`Readonly<T>` | 해당 참조의 타입 검사; 런타임 동결·깊은 불변성은 제외                           |
+| `toSorted()`             | 새 배열 반환; 객체 원소는 공유하므로 원본 객체도 보존해야 하면 해당 객체를 복사 |
 
 참고: [TypeScript의 읽기 전용 속성](https://www.typescriptlang.org/docs/handbook/2/objects.html#readonly-properties)
 
 ## 선택 속성
 
-일부 필드만 갱신하는 요청에 사용합니다.
+속성 생략과 값 전달의 의미가 다르면 선택 속성으로 표현합니다. 아래 API에서는 생략은 유지, 빈 문자열은 비우기를 뜻합니다.
 
 ````ts
 // create-profile-patch.ts
@@ -184,14 +186,14 @@ export function createProfilePatch(nickname: string | undefined): ProfilePatch {
 }
 ````
 
-- `exactOptionalPropertyTypes`를 켜면 `nickname?: string`에 `undefined`를 대입할 수 없습니다. 값을 보내지 않을 때는 속성을 생략합니다.
-- `0`·`false`·빈 문자열을 유지할 기본값 처리는 `??`를 사용합니다.
+- `exactOptionalPropertyTypes`를 켜면 `nickname?: string`에 `undefined`를 대입할 수 없습니다. 생략은 `{}`, 명시적 `undefined`도 받는 계약은 `nickname?: string | undefined`로 구분합니다.
+- `0`·`false`·빈 문자열을 유지하고 `null`·`undefined`만 기본값으로 바꿀 때 `??`를 사용합니다. `null`이 독립된 의미를 가지면 그 분기를 먼저 처리합니다.
 
 참고: [exactOptionalPropertyTypes](https://www.typescriptlang.org/tsconfig/exactOptionalPropertyTypes.html)
 
 ## 고정 값
 
-목록과 타입이 함께 바뀌어야 하면 값에서 타입을 파생합니다.
+런타임 고정 목록과 허용 타입이 함께 바뀌는 계약이면 값에서 타입을 파생합니다. 외부 계약이 목록과 별도로 바뀌면 목록을 그 계약의 유일한 원본으로 삼지 않습니다.
 
 ```ts
 // access-levels.ts
@@ -211,4 +213,4 @@ export const ACCESS_LABELS = {
 } as const satisfies Record<AccessLevel, string>;
 ```
 
-`as const`는 리터럴 타입을 유지하고, [`satisfies`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)는 구조를 검사합니다. 런타임 입력은 별도로 검증합니다.
+`as const`는 리터럴 타입과 읽기 전용 속성을 유지하고, [`satisfies`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)는 추론 결과를 지정 타입으로 바꾸지 않으면서 대입 가능성을 검사합니다. 둘 다 런타임 객체를 동결하거나 외부 입력을 검증하지 않습니다.

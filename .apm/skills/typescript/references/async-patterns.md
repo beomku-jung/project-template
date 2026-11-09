@@ -3,8 +3,9 @@
 ## HTTP 응답
 
 - 선행 파일: [외부 입력 예제](type-patterns.md#외부-입력)의 `parse-user.ts`를 같은 디렉터리에 배치합니다.
-- 실행 환경: 독립된 Node.js 프로세스에서 실행합니다. 예제는 `fetch`를 고정 응답으로 대체해 외부 요청 없이 응답 처리를 검증합니다.
-- 실제 API 적용: `api.example.com`을 실제 API 주소로 바꿉니다.
+- 실행 환경: `fetch`·`Response.json`·top-level await를 지원하는 독립된 Node.js 프로세스입니다. 사용 예제는 고정 응답으로 파싱·정규화 경로만 보여 주며 네트워크 연결 성공을 증명하지 않습니다.
+- 실행 결과: 패키지의 TypeScript 실행 명령으로 사용 예제를 실행하면 `{ id: "u1", name: "민수" }`를 출력합니다. 전역 `fetch` 교체는 이 독립된 예제 안에서만 사용하고 `finally`에서 복구합니다.
+- 실제 API 적용: `api.example.com`을 실제 API 주소로 바꿉니다. 고정 응답 교체 코드를 제품 코드의 실패 대체값으로 넣지 않습니다.
 
 ````ts
 // load-user.ts
@@ -56,14 +57,16 @@ export async function loadUser(id: string): Promise<User> {
 }
 ````
 
-미존재를 정상 결과로 제공하는 API는 해당 상태를 별도 처리합니다.
+미존재를 정상 결과로 제공하는 API라면 그 HTTP 상태를 응답 본문 파싱 전에 구별하고, 반환 타입에도 그 결과를 표현합니다. 모든 비정상 응답을 `null`·빈 사용자 같은 성공값으로 바꾸지 않습니다.
+이 예제는 취소 신호·시간 제한·재시도 계약을 제공하지 않습니다. 호출 계약이 취소를 요구하면 `AbortSignal`을 실제 요청에 전달하고, 요청·본문 처리 중 어느 단계에서 거부되는지 API에 드러냅니다.
 
 참고: [Error.cause](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause)
 
 ## 파일 I/O
 
-- 실행 환경: `mkdtempDisposable`·`await using`을 지원하는 Node.js가 필요합니다.
-- 자원 정리: 사용 예제의 스코프가 끝나면 임시 디렉터리를 삭제합니다.
+- 실행 환경: `mkdtempDisposable`·비동기 정리 심볼을 지원하는 Node.js와 `await using`·top-level await를 처리하는 런타임 또는 변환기가 필요합니다. 타입 선언이나 구문 변환만으로 Node.js API가 추가되지는 않습니다.
+- 실행 효과: 사용 예제는 임시 디렉터리에 파일 세 개를 쓰고, 스코프 종료 시 디렉터리를 삭제합니다. 실행 명령과 자원 정리 지원은 패키지의 런타임·빌드 설정을 따릅니다.
+- 성공 기준: `combineFiles`가 완료된 뒤 읽은 내용은 `"제목\n본문"`입니다. 출력 파일의 쓰기 완료는 원자적 교체나 저장 장치로의 영속화 보장을 뜻하지 않습니다.
 - 참고: [Node.js 임시 디렉터리 정리](https://nodejs.org/api/fs.html#fspromisesmkdtempdisposableprefix-options)
 
 ````ts
@@ -126,6 +129,7 @@ export async function combineFiles(
 }
 ````
 
-`Promise.all`은 첫 거부를 전달하지만 이미 시작한 작업을 취소하지 않습니다.
+`Promise.all`은 첫 거부를 전달하지만 이미 시작한 작업을 취소하지 않습니다. 이 예제의 `finally`는 두 읽기가 모두 끝날 때까지 기다리므로 호출자가 임시 디렉터리를 지우는 시점에 읽기 작업이 남지 않습니다.
+`Promise.all` 자체에는 동시 실행 수 제한이 없습니다.
 
 참고: [Promise.all](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)

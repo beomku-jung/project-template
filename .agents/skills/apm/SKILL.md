@@ -5,17 +5,10 @@ description: 에이전트 스킬·MCP 서버를 탐색·비교·추천하고 APM
 
 # APM 통합 관리
 
-명령은 `apm.yml`과 `mise.toml`이 있는 디렉터리에서 mise로 실행합니다. 스킬 검색에는 Skills CLI를, 설치·배포에는 APM을 사용합니다.
+명령은 `apm.yml`과 `mise.toml`이 있는 디렉터리에서 mise로 실행합니다. Skills CLI는 검색에만 쓰고, 패키지 선언·설치·배포는 APM으로 관리합니다.
 
-## 작업 선택
-
-| 요청                       | 읽을 절                                    |
-| -------------------------- | ------------------------------------------ |
-| 작업에 맞는 스킬·MCP 찾기  | [스킬·MCP 검색](#스킬mcp-검색)             |
-| 스킬 패키지 설치·갱신·제거 | [APM 패키지 관리](#apm-패키지-관리)        |
-| 로컬 스킬 작성·정제·배포   | [로컬 스킬 작성·배포](#로컬-스킬-작성배포) |
-| MCP 서버 연결              | [MCP 연결](#mcp-연결)                      |
-| LSP·플러그인 등 연결       | [기타 통합](#기타-통합)                    |
+검색·비교 요청에서는 후보와 근거만 제공하며 선언·잠금 파일·도구 설정을 바꾸지 않습니다. 외부 패키지의 새 설치·갱신·제거와 새 도구 연결은 해당 변경을 요청받은 범위에서만 실행합니다.
+관리되는 로컬 스킬 원본 수정에는 저장소 규칙에 따른 기존 대상 배포본·잠금 파일 재생성이 포함됩니다. 별도 배포 요청은 필요하지 않으며, 외부 패키지 새 설치나 새 연결까지 허용되지는 않습니다.
 
 ## 스킬·MCP 검색
 
@@ -65,6 +58,15 @@ mise exec -- apm mcp show "<server-name>"
 
 `apm.yml`의 의존성·배포 대상과 설치 상태를 확인합니다. 잠금 파일은 APM 명령으로 갱신합니다.
 
+`apm deps list`를 실행할 수 없거나 실패가 확인·보고됐으면 같은 명령을 재실행하지 않고 다음 자료를 대조합니다. 조회 요청을 APM 자체 수정으로 확대하지 않습니다.
+
+- `apm.yml`: 의존성 식별자·선언 ref·`includes`·배포 대상
+- `apm.lock.yaml`: 잠긴 의존성과 ref·배포 경로·소유자·내용 해시
+- `.apm/skills/`와 선언된 로컬 경로: 원본 스킬·참고 문서의 존재와 내용
+- 잠금 파일의 대상별 경로: 실제 배포 파일의 존재와 원본과의 차이
+
+선언·잠금·실제 파일 중 하나만으로 설치 성공을 판단하지 않습니다. 빈 의존성 목록은 로컬 스킬·배포본이 없다는 뜻이 아닙니다. 결과에 조회 실패·확인한 자료·미확인 설치·연결 상태를 밝힙니다.
+
 | 작업               | 명령                                                       |
 | ------------------ | ---------------------------------------------------------- |
 | 설치된 의존성 확인 | `mise exec -- apm deps list`                               |
@@ -74,7 +76,7 @@ mise exec -- apm mcp show "<server-name>"
 | 전체 의존성 갱신   | `mise exec -- apm update`                                  |
 | 패키지 제거        | `mise exec -- apm uninstall "<package>"`                   |
 
-`<package>`는 의존성 목록의 식별자로 바꿉니다. 전체 갱신은 요청받은 경우에 실행하며, 갱신 범위는 선언된 ref를 따릅니다.
+`<package>`는 목록 또는 선언·잠금 파일에서 확인한 식별자로 바꿉니다. 전체 갱신은 요청받은 경우에 실행하며, 갱신 범위는 선언된 ref를 따릅니다.
 
 ## 로컬 스킬 작성·배포
 
@@ -82,11 +84,11 @@ mise exec -- apm mcp show "<server-name>"
 
 `includes: auto`를 사용하는 프로젝트에서는 `.apm/skills/<name>/SKILL.md`에 스킬 원본을 작성합니다. 이름에는 소문자·숫자·하이픈을 사용하고 폴더명과 맞춥니다.
 
-대표 요청별 산출물을 정하고 [작성·정제 기준](references/skill-authoring.md)에 따라 선택 조건·예제·검증 방법을 연결합니다.
+사용자의 수정 요청·기존 규칙에서 선택할 기본값을 추출하고, [작성·정제 기준](references/skill-authoring.md)에 따라 규칙의 소유자·조건·행동·확인 방법을 정합니다.
 
 ### 배포
 
-스킬 배포본에만 있는 수정은 원본과 비교해 반영한 뒤 아래 명령으로 다시 배포합니다. `apm.yml`을 수정한 경우에도 같은 명령을 사용합니다.
+로컬 원본 수정이나 요청 범위의 `apm.yml` 변경을 기존 대상에 반영할 때 아래 명령으로 배포본·잠금 파일을 재생성합니다. 배포본에만 있는 사용자 수정은 원본과 비교해 원본에 보존한 뒤 실행합니다.
 
 ```sh
 mise exec -- apm install
@@ -127,8 +129,6 @@ mise exec -- apm install --mcp example --transport http --url https://example.co
 
 - [LSP 서버 설치·대상별 지원](https://microsoft.github.io/apm/consumer/install-lsp-servers/)
 - [Copilot Agent Plugins 설치](https://microsoft.github.io/apm/consumer/copilot-agent-plugins/)
-- [프롬프트 작성·실행](https://microsoft.github.io/apm/producer/author-primitives/prompts/)
-- [지침·에이전트 작성·통합](https://microsoft.github.io/apm/producer/author-primitives/instructions-and-agents/)
 
 ## 결과 확인
 
@@ -139,7 +139,8 @@ mise exec -- apm install --mcp example --transport http --url https://example.co
 | 설치·배포      | APM이 갱신한 선언·잠금 파일과 대상별 생성물, 지원 차이·생략 이유               |
 | MCP 연결       | `.codex/config.toml`·`.mcp.json`과 대상 도구의 연결 상태                       |
 
-로컬 스킬은 `.apm/skills/`의 원본과 `.agents/skills/`·`.claude/skills/`의 배포본을 비교합니다. 실패는 기존 문제와 이번 변경의 영향을 구분해 보고합니다.
+로컬 스킬은 `.apm/skills/`의 원본과 `.agents/skills/`·`.claude/skills/`의 배포본을 비교합니다. 파일 생성만으로 대상 도구의 로드·연결 성공을 주장하지 않습니다.
+실행하지 않은 배포·예제·연결 확인은 미실행으로 남기고, 실패는 기존 문제와 이번 변경의 영향을 구분해 보고합니다.
 
 ## 참고
 
